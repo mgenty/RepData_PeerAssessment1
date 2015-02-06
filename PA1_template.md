@@ -13,7 +13,8 @@ output:
 
 Load required libraries:  
 
-```{r results='hide'}
+
+```r
 library(dplyr,     quietly = TRUE, warn.conflicts = FALSE)
 library(ggplot2,   quietly = TRUE, warn.conflicts = FALSE)
 library(lattice,   quietly = TRUE, warn.conflicts = FALSE)
@@ -30,7 +31,8 @@ library(lubridate, quietly = TRUE, warn.conflicts = FALSE)
 
 If the zip file exists, unzip it:  
 
-```{r}
+
+```r
 if (file.exists("activity.zip")) {
     unzip("activity.zip")
 }
@@ -38,13 +40,15 @@ if (file.exists("activity.zip")) {
 
 Read in the data:  
 
-```{r}
+
+```r
 acts <- read.csv("activity.csv", header = TRUE)
 ```
 
 If the zip file still exists, remove the csv file:  
 
-```{r results='hide'}
+
+```r
 if (file.exists("activity.zip")) {
     file.remove("activity.csv")
 }
@@ -54,7 +58,8 @@ if (file.exists("activity.zip")) {
 
 Convert the fields:  
 
-```{r}
+
+```r
 acts$date  <- as.Date(acts$date)
 acts$steps <- as.numeric(acts$steps)
 ```
@@ -69,7 +74,8 @@ acts$steps <- as.numeric(acts$steps)
 
 Build a data frame with the date and total steps for that date:  
 
-```{r}
+
+```r
 stepsPerDay        <- aggregate(steps ~ date, acts, sum)
 names(stepsPerDay) <- c("date", "total")
 ```
@@ -78,14 +84,16 @@ names(stepsPerDay) <- c("date", "total")
 
 Explicitly compute the binwidth:  
 
-```{r}
+
+```r
 rng <- range(stepsPerDay$total)
 bw  <- (rng[2] - rng[1])/30
 ```
 
 Build the histogram:  
 
-```{r}
+
+```r
 g <- ggplot(stepsPerDay, aes(x = total))
 g <- g + 
      coord_cartesian(ylim = c(0, 12)) +
@@ -96,31 +104,31 @@ g <- g +
 
 Plot it:  
 
-```{r}
+
+```r
 print(g)
 ```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 #### 3. Calculate/report mean & median of total steps taken each day:  
 
 Calculate the mean and median of the total steps taken each day:  
 
-```{r}
+
+```r
 meanSPD   <- round(mean(stepsPerDay$total), 0)
 medianSPD <- round(median(stepsPerDay$total), 0)
 ```
 
 Report them:  
 
-```{r echo=FALSE}
-options(scipen=999)
-```
+
 
 The **mean** and **median** of total steps taken each day are 
-**`r meanSPD`** and **`r medianSPD`** respectively.  
+**10766** and **10765** respectively.  
 
-```{r echo=FALSE}
-options(scipen=0)
-```
+
 
 ------------------------------------------------------------------------------
 
@@ -132,7 +140,8 @@ options(scipen=0)
 
 Calculate the averages for each of the 5-minute intervals:  
 
-```{r}
+
+```r
 stepsPerInt        <- aggregate(steps ~ interval, acts, mean)
 names(stepsPerInt) <- c("interval", "mean")
 stepsPerInt$mean   <- round(stepsPerInt$mean)
@@ -140,7 +149,8 @@ stepsPerInt$mean   <- round(stepsPerInt$mean)
 
 Plot the time series:
 
-```{r}
+
+```r
 plot(stepsPerInt$interval, stepsPerInt$mean, 
      type = "l", lwd = 2, col = "blue",
      xlab = "Interval", ylab = "Avg Steps Taken")
@@ -148,18 +158,21 @@ grid(col = "steelblue", lwd = 1)
 title("Average Steps Taken per Interval for All Days")
 ```
 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png) 
+
 #### 2. Which 5-minute interval on average contains maximum number of steps:  
 
 Find the 5-minute interval with the largest average value:  
 
-```{r}
+
+```r
 maxAvgIvl <- stepsPerInt$interval[stepsPerInt$mean == max(stepsPerInt$mean)]
 maxAvg    <- max(stepsPerInt$mean)
 ```
 
 The 5-minute interval with the largest 
-average step value is interval **`r maxAvgIvl`**.  
-On average, there were **`r maxAvg`** 
+average step value is interval **835**.  
+On average, there were **206** 
 steps taken during that interval.  
 
 ------------------------------------------------------------------------------
@@ -172,21 +185,18 @@ steps taken during that interval.
 
 Calculate the total number of missing values (rows with NAs):  
 
-```{r}
+
+```r
 missingValues <- nrow(acts) - sum(complete.cases(acts))
 ```
 
 Report them:  
 
-```{r echo=FALSE}
-options(scipen=999)
-```
 
-There are **`r missingValues`** missing values in the dataset. 
 
-```{r echo=FALSE}
-options(scipen=0)
-```
+There are **2304** missing values in the dataset. 
+
+
 
 #### 2. Devise a strategy for filling in the missing values:  
 
@@ -199,7 +209,8 @@ Imputation Strategy:
 
 Calculate the imputation values:  
 
-```{r}
+
+```r
 actsGrouped <- group_by(acts, date)
 dailyAvg    <- ungroup(summarize(actsGrouped, 
                        avg = round(sum(steps, na.rm=TRUE)/length(interval))))
@@ -209,7 +220,8 @@ dailyAvg    <- ungroup(summarize(actsGrouped,
 
 Replace the step count NAs with the imputed value for the given day:  
 
-```{r}
+
+```r
 actsImp <- merge(acts, dailyAvg, by.x="date", by.y="date", all=TRUE)
 naPos   <- which(is.na(actsImp$steps))
 for ( n in naPos ) {
@@ -221,21 +233,24 @@ for ( n in naPos ) {
 
 Build a data frame with the date and total steps for that date:  
 
-```{r}
+
+```r
 stepsPerDay        <- aggregate(steps ~ date, actsImp, sum)
 names(stepsPerDay) <- c("date", "total")
 ```
 
 Explicitly compute the binwidth:  
 
-```{r}
+
+```r
 rng <- range(stepsPerDay$total)
 bw  <- (rng[2] - rng[1])/30
 ```
 
 Build the histogram:  
 
-```{r}
+
+```r
 g <- ggplot(stepsPerDay, aes(x = total))
 g <- g + 
      coord_cartesian(ylim = c(0, 12)) +
@@ -246,29 +261,29 @@ g <- g +
 
 Plot it:  
 
-```{r}
+
+```r
 print(g)
 ```
 
+![plot of chunk unnamed-chunk-24](figure/unnamed-chunk-24-1.png) 
+
 Calculate the mean and median of the total steps taken each day:  
 
-```{r}
+
+```r
 meanSPD   <- round(mean(stepsPerDay$total), 0)
 medianSPD <- round(median(stepsPerDay$total), 0)
 ```
 
 Report them:  
 
-```{r echo=FALSE}
-options(scipen=999)
-```
+
 
 The **mean** and **median** of total steps taken each day from the *imputed*
-dataset are **`r meanSPD`** and **`r medianSPD`** respectively.   
+dataset are **9354** and **10395** respectively.   
 
-```{r echo=FALSE}
-options(scipen=0)
-```
+
 
 Follow-on questions:  
 
@@ -299,7 +314,8 @@ of the total daily number of steps?
 
 Create the new factor variable and add it to the dataframe:  
 
-```{r}
+
+```r
 actsImp$dow     <- weekdays(actsImp$date)
 actsImp$dowType <- factor(weekdays(actsImp$date) %in% c("Saturday", "Sunday"), 
                           labels = c("weekday", "weekend"))
@@ -309,7 +325,8 @@ actsImp$dowType <- factor(weekdays(actsImp$date) %in% c("Saturday", "Sunday"),
 
 Calculate average steps taken per interval by day of week (DOW) type:  
 
-```{r}
+
+```r
 actsImpGrouped <- group_by(actsImp, dowType, interval)
 intAvg         <- ungroup(summarize(actsImpGrouped, avg = round(mean(steps))))
 names(intAvg)  <- c("dowType", "interval", "average")
@@ -318,11 +335,14 @@ names(intAvg)  <- c("dowType", "interval", "average")
 Make panel plot of time series for average steps 
 across the 5-minute intervals:  
 
-```{r}
+
+```r
 xyplot(average ~ interval | dowType, intAvg, 
     layout = c(1, 2), type = "l",
     xlab = "Interval", ylab = "Average Number of Steps Taken",
     main = "Average Steps Taken per Interval - All Days (Imputed) by DOW Type")
 ```
+
+![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30-1.png) 
 
 ------------------------------------------------------------------------------
