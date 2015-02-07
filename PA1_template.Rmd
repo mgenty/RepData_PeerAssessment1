@@ -279,15 +279,26 @@ of the assignment?
 
 What is the impact of imputing the missing data on the estimates
 of the total daily number of steps?  
+
+```{r}
+totalRows  <- nrow(acts)
+totalDays  <- length(unique(acts$date))
+intsPerDay <- length(unique(acts$interval))
+totalNAs   <- sum(is.na(acts$steps))
+naDays     <- totalNAs / intsPerDay
+naPercent  <- round(((totalNAs / totalRows) * 100))
+```
   
-**There were 8 days out of 61 that had NA step values. For any given day,**
-**there are 288 intervals recorded, and for the 8 days in question all of**
-**the step counts were NAs, for a total of 2304 out of 17568 observations.** 
+**There were `r naDays` days out of `r totalDays` that had NA step values.**
+**For any given day, there are `r intsPerDay` intervals recorded, and for**
+**the `r naDays` days in question all of the step counts were NAs, for a**
+**total of `r totalNAs` out of `r totalRows` observations (~`r naPercent`%).** 
 **The imputation replaced those NAs with zeros. This skewed the data to**
 **the left, which impacted both the mean and the median values, with the**
 **mean value experiencing the larger change.**  
 
-**It is likely that the device was not worn on the 8 days in question.**    
+**It is likely that the device was not worn** 
+**on the `r naDays` days in question.**    
 
 ------------------------------------------------------------------------------
 
